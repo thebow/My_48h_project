@@ -5,6 +5,9 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const cors = require("cors");
 
+const bcrypt = require('bcrypt');
+const saltcost = 10;
+
 
 
 const db = mysql.createPool({
@@ -39,22 +42,27 @@ app.get('/api/get', (req, res) => {
     })
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * Login
  */
 
  app.post('/api/login', (req, res) => {
-    const {name, email} = req.body;
-    const sqlSelect = "select * from contact_db where name = ? and email = ?";
-    db.query(sqlSelect, [name, email], (err, result) => {
+    const {password, email} = req.body;
+    const sqlSelect = "select * from contact_db where email = ?";
+    db.query(sqlSelect, email, (err, result) => {
         if(err){
-            res.send({err : "Wrong username combination"})
+            res.send({err : "Wrong email combination"})
         }
         if(result.length > 0)
         {
             console.log("Login Data", result)
-            res.status(200).send(result);// for the browser
-            /**
+            bcrypt.compare(password, result[0].password, (error, response)=>{
+                if(response){
+                    res.send(result);
+
+/**
  * Send email
  */
 
@@ -69,8 +77,8 @@ var transporter = nodemailer.createTransport({
   var mailOptions = {
     from: 'brathebow@gmail.com',
     to: 'alirhaiem@yahoo.fr',
-    subject: `welcome back : ${name}`,
-    text: `Nice to see back : ${name}`
+    subject: `welcome back : ${result[0].name}`,
+    text: `Nice to see you again :) : ${result[0].name}`
   };
   
   transporter.sendMail(mailOptions, function(error, info){
@@ -83,10 +91,17 @@ var transporter = nodemailer.createTransport({
 /**
  * End send email
  */
+                }else{
+                    res.send({message: 'Wrong name/email combination'});
+                }
+            })
+           // res.status(200).send(result);// for the browser
+
         }else{
-            res.send({message: 'Wrong name/email combination'});
+            res.send({message: 'User does not exist'});
         }
     })
+
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,10 +111,12 @@ var transporter = nodemailer.createTransport({
  */
 
 app.post('/api/post', (req, res) => {
-    const {name, email, contact} = req.body;
+    const {name, email, contact, password} = req.body;
    // const sqlInsert = "insert into contact_db (name, email, contact) values ('katkoutou', 'katkoutou@yahoo.com', 02314567) ";
-    const sqlInsert = "insert into contact_db (name, email, contact) values (?, ?, ?) ";
-        db.query(sqlInsert, [name, email, contact], (err, result) => {
+   bcrypt.hash(password, saltcost, (err, hash)=>{
+    if(err){console.log(err)}
+       const sqlInsert = "insert into contact_db (name, email, contact, password) values (?, ?, ?,?) ";
+        db.query(sqlInsert, [name, email, contact, hash], (err, result) => {
             if(err){
                 console.log("err", err)
             }else{
@@ -136,6 +153,9 @@ var transporter = nodemailer.createTransport({
  */
             }
         })
+    })
+  
+    
     console.log('hello world from the terminal'); // for the terminal
 })
 
