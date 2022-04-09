@@ -18,6 +18,7 @@ const AddEdit = () => {
     
     const navigate = useNavigate();
 
+   // axios.defaults.withCredentials = true;
     const handelSubmit = (e) => {
         e.preventDefault();
         if(!password|| !email ) {

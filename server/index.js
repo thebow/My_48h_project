@@ -5,10 +5,11 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const cors = require("cors");
 
+//const cookieParser = require('cookie-parser');
+ //const session = require('express-session');
+
 const bcrypt = require('bcrypt');
 const saltcost = 10;
-
-
 
 const db = mysql.createPool({
     host: 'localhost',
@@ -17,12 +18,44 @@ const db = mysql.createPool({
     database:"crud_contact"
 });
 
-app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended:true}));
 
+//Add Access Control Allow Origin headers
+// app.use((req, res, next) => {
+//     res.setHeader("Access-Control-Allow-Origin", "*");
+//     res.header(
+//       "Access-Control-Allow-Headers",
+//       "Origin, X-Requested-With, Content-Type, Accept"
+//     );
+//     next();
+//   });
+
+// app.use(cors({
+//     Origin: '*',
+//     methods: ['GET', 'POST'],
+//     credentials:true
+// }));
+
+app.use(cors());
+
+// const corsConfig = {
+//    // credentials: true,
+//     origin: true,
+// };
+//app.use(cors(corsConfig));
+
+// app.use(cookieParser);
+// app.use(session({
+//     key: 'userId',
+//     secret:'rbk-c19-22-04-09',
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: { expires:60*60*24}
+// }));
+
 app.listen(5000, ()=>{
-    console.log('listening on port 5000')
+    console.log('listening on port 5000');
 });
 
 /**
@@ -60,7 +93,11 @@ app.get('/api/get', (req, res) => {
             console.log("Login Data", result)
             bcrypt.compare(password, result[0].password, (error, response)=>{
                 if(response){
+                   //req.session.user = result;
+                  //console.log(req.session.user);
                     res.send(result);
+
+
 
 /**
  * Send email

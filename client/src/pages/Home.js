@@ -7,7 +7,8 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 
 const Home = () => {
-
+ 
+  
   const [data, setData] = useState([]);
   const loadData = async () => {
     const response = await axios.get("http://localhost:5000/api/get");
